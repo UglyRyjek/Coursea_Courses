@@ -1,0 +1,123 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+
+namespace ProgrammingAssignment4
+{
+
+    public class TeddyBear
+    {
+        #region Fields
+
+        bool collecting = false;
+        bool targetSet = false;
+
+        Texture2D sprite;
+        Rectangle drawRectangle;
+        int halfDrawRectangleWidth;
+        int halfDrawRectangleHeight;
+
+        const float BaseSpeed = 0.3f;
+        Vector2 location;
+        Vector2 velocity = Vector2.Zero;
+
+        bool leftClickStarted = false;
+        bool leftButtonReleased = true;
+
+        #endregion
+
+        #region Constructors
+
+        
+        public TeddyBear(Texture2D sprite, Vector2 location)
+        {
+            this.sprite = sprite;
+            this.location = location;
+
+            halfDrawRectangleWidth = sprite.Width / 2;
+            halfDrawRectangleHeight = sprite.Height / 2;
+             this.drawRectangle = new Rectangle( (int) location.X - sprite.Width/2, (int)location.Y - sprite.Height/2, sprite.Width/2, sprite.Height/2 );
+        }
+
+        #endregion
+
+        #region Properties
+
+        public bool Collecting
+        {
+            get { return collecting; }
+            set { collecting = value; }
+        }
+
+        public Rectangle CollisionRectangle
+        {
+            get { return drawRectangle; }
+        }
+        #endregion
+
+        #region Public methods
+        
+        public void Update(GameTime gameTime, MouseState mouse)
+        {
+            if (collecting )
+            { 
+            Vector2 directionVector = Vector2.Normalize(velocity - location);
+            location += directionVector * BaseSpeed * 8;
+            drawRectangle = new Rectangle((int)location.X - sprite.Width/4, (int)location.Y - sprite.Height / 4, sprite.Width / 2, sprite.Height / 2);
+            }
+			
+            if (drawRectangle.Contains(mouse.X, mouse.Y))
+            {
+                if (mouse.LeftButton == ButtonState.Pressed &&
+                    leftButtonReleased)
+                {
+                    leftClickStarted = true;
+                    leftButtonReleased = false;
+                }
+                else if (mouse.LeftButton == ButtonState.Released)
+                {
+                    leftButtonReleased = true;
+
+                    if (leftClickStarted)
+                    {
+                        if (targetSet)
+                        {
+                            collecting = true;
+                        }
+                        leftClickStarted = false;
+                    }
+                }
+            }
+            else
+            {
+                leftClickStarted = false;
+                leftButtonReleased = false;
+            }
+        }
+        
+        public void Draw(SpriteBatch spriteBatch)
+        {
+            spriteBatch.Draw(sprite, drawRectangle, Color.White);
+        }
+
+        public void SetTarget(Vector2 target)
+        {
+            targetSet = true;
+            velocity = target;
+            //Collecting = true;
+        }
+
+
+        public void ClearTarget()
+        {
+            targetSet = false;
+        }
+
+        #endregion
+    }
+}

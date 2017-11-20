@@ -1,0 +1,150 @@
+using System.Collections.Generic;
+
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+
+namespace ProgrammingAssignment4
+{
+
+    public class Game1 : Game
+    {
+        GraphicsDeviceManager graphics;
+        SpriteBatch spriteBatch;
+
+        const int WindowWidth = 960;
+        const int WindowHeight = 540;
+                //const int WindowWidth = 1024;
+                //const int WindowHeight = 800;
+
+
+        Texture2D[] songoSprites = new Texture2D[5];
+        Texture2D tlo;
+        TeddyBear teddy;
+
+        Texture2D pickupSprite;
+        List<Pickup> pickups = new List<Pickup>();
+
+        bool rightClickStarted = false;
+        bool rightButtonReleased = true;
+        public const int wH = WindowHeight;
+        public const int wW = WindowWidth;
+        public Game1()
+        {
+            graphics = new GraphicsDeviceManager(this);
+            Content.RootDirectory = "Content";
+            IsMouseVisible = true;
+            }
+        
+        
+        protected override void Initialize()
+        {
+            base.Initialize();
+        }
+
+        protected override void LoadContent()
+        {
+            spriteBatch = new SpriteBatch(GraphicsDevice);
+            tlo = Content.Load<Texture2D>("DBtlo");
+
+            songoSprites[0] = Content.Load<Texture2D>("Center");
+            songoSprites[1] = Content.Load<Texture2D>("LUa");
+            songoSprites[2] = Content.Load<Texture2D>("RUa");
+            songoSprites[3] = Content.Load<Texture2D>("RDa");
+            songoSprites[4] = Content.Load<Texture2D>("LDa");
+
+            pickupSprite = Content.Load<Texture2D>("kula");
+                    // STUDENTS: create teddy object centered in window
+
+            int x = WindowWidth/2;
+            int y = WindowHeight/2;
+
+            Vector2 lok = new Vector2(x, y); 
+            teddy = new TeddyBear(songoSprites[0], lok);
+        }
+
+
+        protected override void UnloadContent()
+        {
+
+        }
+
+       
+        protected override void Update(GameTime gameTime)
+        {
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+                Exit();
+
+            MouseState mouse = Mouse.GetState();
+
+                            // check for right click started
+            if (mouse.RightButton == ButtonState.Pressed && rightButtonReleased)
+            {
+                rightClickStarted = true;
+                rightButtonReleased = false;
+            }
+            else if (mouse.RightButton == ButtonState.Released)
+            {
+                rightButtonReleased = true;
+
+                                // if right click finished, add new pickup to list
+                if (rightClickStarted)
+                {
+                    rightClickStarted = false;
+                    pickups.Add(new Pickup(pickupSprite, new Vector2 (mouse.X, mouse.Y)));
+          
+                    if (pickups.Count == 1)
+                    {
+                        Vector2 newTarget = new Vector2(pickups[0].lokalizacja.X, pickups[0].lokalizacja.Y);
+                        teddy.SetTarget(newTarget);
+                        
+                    }
+                }
+            }
+
+            if (teddy.Collecting && teddy.CollisionRectangle.Intersects(pickups[0].CollisionRectangle))
+            {
+                pickups.RemoveAt(0);
+                if (pickups.Count > 0)
+                {
+                    Vector2 newTarget = new Vector2(pickups[0].lokalizacja.X, pickups[0].lokalizacja.Y);
+                    teddy.SetTarget(newTarget);
+                }
+                else
+                {
+                    teddy.ClearTarget();
+                }
+            }
+
+            if (pickups.Count == 0)
+            {
+                teddy.Collecting = false;
+            }
+
+            teddy.Update(gameTime, mouse);
+            base.Update(gameTime);
+        }
+
+        
+        protected override void Draw(GameTime gameTime)
+        {
+            GraphicsDevice.Clear(Color.CornflowerBlue);
+
+            spriteBatch.Begin();
+            spriteBatch.Draw(tlo, new Rectangle(0, 0, wW, wH), Color.White);
+            if (pickups.Count > 0)
+            { 
+                foreach (Pickup pickup in pickups)
+                {
+                    pickup.Draw(spriteBatch);
+                }
+                
+            }
+            teddy.Draw(spriteBatch);
+            spriteBatch.End();
+            
+            base.Draw(gameTime);
+        }
+    }
+}
+

@@ -1,0 +1,53 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+
+namespace ProgrammingAssignment4
+{
+   
+    public class Pickup
+    {
+        #region Fields
+
+        Texture2D sprite;
+        Rectangle drawRectangle;
+        public Vector2 lokalizacja;
+        #endregion
+
+        #region Constructors
+
+
+        public Pickup(Texture2D sprite, Vector2 location)
+        {
+            this.sprite = sprite;
+            this.lokalizacja = location;
+            int spriteSize = 50;
+            drawRectangle = new Rectangle((int)lokalizacja.X , (int)lokalizacja.Y , spriteSize / 2, spriteSize / 2);
+        }
+
+        #endregion
+
+        #region Properties
+
+        public Rectangle CollisionRectangle
+        {
+            get { return drawRectangle; }
+        }
+
+        #endregion
+
+        #region Public methods
+
+        public void Draw(SpriteBatch spriteBatch)
+        {
+            spriteBatch.Draw(sprite, drawRectangle, Color.White);
+
+        }
+
+        #endregion
+    }
+}

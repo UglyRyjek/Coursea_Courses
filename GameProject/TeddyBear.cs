@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-
 namespace GameProject
 {
     /// <summary>
@@ -16,28 +14,20 @@ namespace GameProject
     public class TeddyBear
     {
         #region Fields
-
         bool active = true;
-
         // drawing support
         Texture2D sprite;
         Rectangle drawRectangle;
-
         // velocity information
         Vector2 velocity = new Vector2(0, 0);
-
         // shooting support
         int elapsedShotMilliseconds = 0;
         int firingDelay;
-
         // sound effects
         SoundEffect bounceSound;
         SoundEffect shootSound;
-
         #endregion
-
         #region Constructors
-
         /// <summary>
         ///  Constructs a teddy bear centered on the given x and y with the
         ///  given velocity
@@ -57,11 +47,8 @@ namespace GameProject
             this.shootSound = shootSound;
             firingDelay = GetRandomFiringDelay();
         }
-
         #endregion
-
         #region Properties
-
         /// <summary>
         /// Gets and sets whether or not the teddy bear is active
         /// </summary>
@@ -70,7 +57,6 @@ namespace GameProject
             get { return active; }
             set { active = value; }
         }
-
         /// <summary>
         /// Gets the location of the teddy bear
         /// </summary>
@@ -78,7 +64,6 @@ namespace GameProject
         {
             get { return drawRectangle.Center; }
         }
-
         /// <summary>
         /// Sets the x location of the center of the teddy bear
         /// </summary>
@@ -86,7 +71,6 @@ namespace GameProject
         {
             set { drawRectangle.X = value - drawRectangle.Width / 2; }
         }
-
         /// <summary>
         /// Sets the y location of the center of the teddy bear
         /// </summary>
@@ -94,7 +78,6 @@ namespace GameProject
         {
             set { drawRectangle.Y = value - drawRectangle.Height / 2; }
         }
-
         /// <summary>
         /// Gets the collision rectangle for the teddy bear
         /// </summary>
@@ -102,7 +85,6 @@ namespace GameProject
         {
             get { return drawRectangle; }
         }
-
         /// <summary>
         /// Gets and sets the velocity of the teddy bear
         /// </summary>
@@ -111,7 +93,6 @@ namespace GameProject
             get { return velocity; }
             set { velocity = value; }
         }
-
         /// <summary>
         /// Gets and sets the draw rectangle for the teddy bear
         /// </summary>
@@ -120,11 +101,8 @@ namespace GameProject
             get { return drawRectangle; }
             set { drawRectangle = value; }
         }
-
         #endregion
-
         #region Public methods
-
         /// <summary>
         /// Updates the teddy bear's location, bouncing if necessary. Also has
         /// the teddy bear fire a projectile when it's time to
@@ -139,11 +117,18 @@ namespace GameProject
             BounceTopBottom();
             BounceLeftRight();
 
-            // fire projectile as appropriate
-            // timer concept (for animations) introduced in Chapter 7
-
+            if (elapsedShotMilliseconds > firingDelay)
+            {
+                Projectile pocisk = new Projectile(ProjectileType.TeddyBear, Game1.GetProjectileSprite(ProjectileType.TeddyBear), drawRectangle.X + drawRectangle.Width / 2, (drawRectangle.Y + drawRectangle.Height / 2) + GameConstants.TeddyBearProjectileOffset, GetProjectileYVelocity());
+                Game1.AddProjectile(pocisk);
+                elapsedShotMilliseconds = 0;
+                firingDelay = GetRandomFiringDelay();
+            }
+            else
+            {
+                elapsedShotMilliseconds += gameTime.ElapsedGameTime.Milliseconds;
+            }
         }
-
         /// <summary>
         /// Draws the teddy bear
         /// </summary>
@@ -152,11 +137,8 @@ namespace GameProject
         {
             spriteBatch.Draw(sprite, drawRectangle, Color.White);
         }
-
         #endregion
-
         #region Private methods
-
         /// <summary>
         /// Loads the content for the teddy bear
         /// </summary>
@@ -173,7 +155,6 @@ namespace GameProject
                 y - sprite.Height / 2, sprite.Width,
                 sprite.Height);
         }
-
         /// <summary>
         /// Bounces the teddy bear off the top and bottom window borders if necessary
         /// </summary>
@@ -210,7 +191,6 @@ namespace GameProject
                 velocity.X *= -1;
             }
         }
-
         /// <summary>
         /// Gets a random firing delay between MIN_FIRING_DELAY and
         /// MIN_FIRING_DELY + FIRING_RATE_RANGE
@@ -221,7 +201,6 @@ namespace GameProject
             return GameConstants.BearMinFiringDelay +
                 RandomNumberGenerator.Next(GameConstants.BearFiringRateRange);
         }
-
         /// <summary>
         /// Gets the y velocity for the projectile being fired
         /// </summary>
@@ -237,7 +216,6 @@ namespace GameProject
                 return GameConstants.TeddyBearProjectileSpeed;
             }
         }
-
         #endregion
     }
 }

@@ -2,13 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-
 namespace GameProject
 {
     /// <summary>
@@ -17,25 +15,18 @@ namespace GameProject
     public class Burger
     {
         #region Fields
-
         // graphic and drawing info
         Texture2D sprite;
         Rectangle drawRectangle;
-
         // burger stats
         int health = 100;
-
         // shooting support
         bool canShoot = true;
         int elapsedCooldownMilliseconds = 0;
-
         // sound effect
         SoundEffect shootSound;
-
         #endregion
-
         #region Constructors
-
         /// <summary>
         ///  Constructs a burger
         /// </summary>
@@ -50,11 +41,8 @@ namespace GameProject
             LoadContent(contentManager, spriteName, x, y);
             this.shootSound = shootSound;
         }
-
         #endregion
-
         #region Properties
-
         /// <summary>
         /// Gets the collision rectangle for the burger
         /// </summary>
@@ -62,11 +50,8 @@ namespace GameProject
         {
             get { return drawRectangle; }
         }
-
         #endregion
-
         #region Public methods
-
         /// <summary>
         /// Updates the burger's location based on mouse. Also fires 
         /// french fries as appropriate
@@ -75,35 +60,50 @@ namespace GameProject
         /// <param name="mouse">the current state of the mouse</param>
         public void Update(GameTime gameTime, MouseState mouse)
         {
-            // burger should only respond to input if it still has health
-
+            //burger should only respond to input if it still has health
+            if (health <= 0)
+            {
+                return; // its passess the rest of the methond this way
+            }
             // move burger using mouse
-
             // clamp burger in window
-
+            drawRectangle.X = MathHelper.Clamp(mouse.X, 0, GameConstants.WindowWidth - sprite.Width);
+            drawRectangle.Y = MathHelper.Clamp(mouse.Y, 0, GameConstants.WindowHeight - sprite.Height);
             // update shooting allowed
             // timer concept (for animations) introduced in Chapter 7
-
             // shoot if appropriate
+            if (mouse.LeftButton == ButtonState.Pressed && canShoot)
+            {
+                float vel = GameConstants.FrenchFriesProjectileSpeed;
+                Projectile pocisk = new Projectile(ProjectileType.FrenchFries, Game1.GetProjectileSprite(ProjectileType.FrenchFries), mouse.X + drawRectangle.Width / 2, (mouse.Y + drawRectangle.Height / 2) + GameConstants.FrenchFriesProjectileOffset, -vel);
+                Game1.AddProjectile(pocisk);
+                canShoot = false;
+                elapsedCooldownMilliseconds = 0;
+            }
+            else if (mouse.LeftButton == ButtonState.Released && !canShoot)
+            {
+                canShoot = true;
+            }
+            else
+            {
+                elapsedCooldownMilliseconds += gameTime.ElapsedGameTime.Milliseconds;
+                if (elapsedCooldownMilliseconds > GameConstants.BurgerTotalCooldownMilliseconds)
+                {
+                    canShoot = true;
+                }
+            }
 
         }
-
         /// <summary>
         /// Draws the burger
         /// </summary>
         /// <param name="spriteBatch">the sprite batch to use</param>
         public void Draw(SpriteBatch spriteBatch)
         {
-
-
             spriteBatch.Draw(sprite, drawRectangle, Color.White);
-
         }
-
         #endregion
-
         #region Private methods
-
         /// <summary>
         /// Loads the content for the burger
         /// </summary>

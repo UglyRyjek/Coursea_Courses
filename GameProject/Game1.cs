@@ -33,8 +33,7 @@ namespace GameProject
         string scoreString = GameConstants.ScorePrefix + 0;
 
         // health support
-        string healthString = GameConstants.HealthPrefix +
-            GameConstants.BurgerInitialHealth;
+        string healthString = GameConstants.HealthPrefix + GameConstants.BurgerInitialHealth;
         bool burgerDead = false;
 
         // text display support
@@ -71,7 +70,7 @@ namespace GameProject
         {
             RandomNumberGenerator.Initialize();
 
-            SpawnBear(teddyBounce, teddyShot);
+            
 
             base.Initialize();
         }
@@ -92,28 +91,28 @@ namespace GameProject
             explosion = Content.Load<SoundEffect>("bin/audio/Explosion");
             teddyBounce = Content.Load<SoundEffect>("bin/audio/TeddyBounce");
             teddyShot = Content.Load<SoundEffect>("bin/audio/TeddyShot");
-
-
-
+            
             // load sprite font
             font = Content.Load<SpriteFont>("bin/fonts/Arial20");
-
+            // load projectile and explosion sprites
             frenchFriesSprite = Content.Load<Texture2D>("bin/graphics/frenchfries");
             teddyBearProjectileSprite = Content.Load<Texture2D>("bin/graphics/teddybearprojectile"); 
             explosionSpriteStrip = Content.Load<Texture2D>("bin/graphics/explosion");
 
 
-            // load projectile and explosion sprites
-            
 
 
             // add initial game objects
+            for (int i = 0; i < GameConstants.MaxBears; i++)
+            {
+                SpawnBear(teddyBounce, teddyShot);
+            }
+            
 
             burger = new Burger(Content, "bin/graphics/burger", winWidth / 2, (winHeight / 4)*3, null);
 
-
             // set initial health and score strings
-
+            
         }
 
         /// <summary>
@@ -154,18 +153,135 @@ namespace GameProject
             }
 
             // check and resolve collisions between teddy bears
+            for (int i = 0; i < bears.Count; i++)
+            {
+                for (int j = i + 1; j < bears.Count; j++)
+                {
+                    if( (bears[i].Active && bears[j].Active) && i != j)
+                    {
+                        TeddyBear b1 = bears[i];
+                        TeddyBear b2 = bears[j];
+                        //if (b1.CollisionRectangle.Intersects(b2.CollisionRectangle)) ;
+                        CollisionResolutionInfo colInfo = CollisionUtils.CheckCollision(gameTime.ElapsedGameTime.Milliseconds, GameConstants.WindowWidth, GameConstants.WindowHeight, b1.Velocity, b1.DrawRectangle, b2.Velocity, b2.DrawRectangle);
+                        if (colInfo != null)
+                        {
+
+                            if(colInfo.FirstOutOfBounds)
+                            {
+                                Explosion exp = new Explosion(explosionSpriteStrip, b1.Location.X, b1.Location.Y);
+                                explosions.Add(exp);
+                                b1.Active = false;
+                            }
+                            else
+                            {
+                                b2.Velocity = colInfo.FirstVelocity;
+                                b2.DrawRectangle = colInfo.FirstDrawRectangle;
+                            }
+
+                            if(colInfo.SecondOutOfBounds)
+                            {
+                                Explosion exp = new Explosion(explosionSpriteStrip, b2.Location.X, b2.Location.Y);
+                                explosions.Add(exp);
+                                b2.Active = false;
+
+                            }
+                            else
+                            {
+                                b1.Velocity = colInfo.SecondVelocity;
+                                b1.DrawRectangle = colInfo.SecondDrawRectangle;
+
+                            }
+
+
+
+                        }
+                    }
+                }
+            }
+
 
             // check and resolve collisions between burger and teddy bears
+            foreach (TeddyBear bear in bears)
+            {
+                    if (bear.Active)
+                    {
+                        if (bear.CollisionRectangle.Intersects(burger.CollisionRectangle))
+                        {
+                            bear.Active = false;
+                            Explosion exp = new Explosion(explosionSpriteStrip, bear.Location.X, bear.Location.Y);
+                            explosions.Add(exp);
+                        //TODO
+                        }
+                    }
+            }
 
             // check and resolve collisions between burger and projectiles
-
+            foreach (Projectile proj in projectiles)
+            {
+                if (proj.Type == ProjectileType.TeddyBear)
+                {
+                    if (proj.Active)
+                    {
+                        if (proj.CollisionRectangle.Intersects(burger.CollisionRectangle))
+                        {
+                            proj.Active = false;
+                            //TODO
+                        }
+                    }
+                }
+            }
             // check and resolve collisions between teddy bears and projectiles
-
+            foreach (TeddyBear bear in bears)
+            {
+                foreach (Projectile proj in projectiles)
+                {
+                    if (proj.Type == ProjectileType.FrenchFries)
+                    {
+                        if (proj.Active && bear.Active)
+                        {
+                            if (bear.CollisionRectangle.Intersects(proj.CollisionRectangle))
+                            {
+                                proj.Active = false;
+                                bear.Active = false;
+                                Explosion exp = new Explosion(explosionSpriteStrip, bear.Location.X, bear.Location.Y);
+                                explosions.Add(exp);
+                            }
+                        }
+                    }
+                }
+            }
             // clean out inactive teddy bears and add new ones as necessary
+            for (int i = 0; i < bears.Count; i++)
+            {
+                if(bears[i].Active == false)
+                {
+                    bears.RemoveAt(i);
+                }
+            }
+
+            while(bears.Count < GameConstants.MaxBears)
+            {
+                SpawnBear(teddyBounce, teddyShot);
+            }
+
 
             // clean out inactive projectiles
-
+            for (int i = 0; i < projectiles.Count; i++)
+            {
+                if (projectiles[i].Active == false)
+                {
+                    projectiles.RemoveAt(i);
+                }
+            }
             // clean out finished explosions
+            for (int i = 0; i < explosions.Count; i++)
+            {
+                if(explosions[i].Finished)
+                {
+                    explosions.RemoveAt(i);
+                }
+            }
+
 
             base.Update(gameTime);
         }

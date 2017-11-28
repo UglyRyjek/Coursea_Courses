@@ -110,6 +110,9 @@ namespace GameProject
         /// <param name="gameTime">game time</param>
         public void Update(GameTime gameTime)
         {
+            //if (!Active)
+           //     return;
+
             // move the teddy bear
             drawRectangle.X += (int)(velocity.X * gameTime.ElapsedGameTime.Milliseconds);
             drawRectangle.Y += (int)(velocity.Y * gameTime.ElapsedGameTime.Milliseconds);

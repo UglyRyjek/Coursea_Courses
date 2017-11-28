@@ -43,6 +43,13 @@ namespace GameProject
         }
         #endregion
         #region Properties
+
+        public int HP
+        {
+            get { return health; }
+            set { health += value;  if (health < 0) health = 0; }
+        }
+
         /// <summary>
         /// Gets the collision rectangle for the burger
         /// </summary>

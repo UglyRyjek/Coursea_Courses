@@ -28,6 +28,9 @@ namespace GameProject
         static Texture2D teddyBearProjectileSprite;
         static Texture2D explosionSpriteStrip;
 
+        
+
+        static Texture2D teddySprite;
         // scoring support
         int score = 0;
         string scoreString = GameConstants.ScorePrefix + 0;
@@ -99,7 +102,7 @@ namespace GameProject
             teddyBearProjectileSprite = Content.Load<Texture2D>("bin/graphics/teddybearprojectile"); 
             explosionSpriteStrip = Content.Load<Texture2D>("bin/graphics/explosion");
 
-
+            teddySprite = Content.Load<Texture2D>("bin/graphics/burger");
 
 
             // add initial game objects
@@ -208,6 +211,7 @@ namespace GameProject
                         if (bear.CollisionRectangle.Intersects(burger.CollisionRectangle))
                         {
                             bear.Active = false;
+                            burger.HP -= GameConstants.BearDamage;
                             Explosion exp = new Explosion(explosionSpriteStrip, bear.Location.X, bear.Location.Y);
                             explosions.Add(exp);
                         //TODO
@@ -225,6 +229,7 @@ namespace GameProject
                         if (proj.CollisionRectangle.Intersects(burger.CollisionRectangle))
                         {
                             proj.Active = false;
+                            burger.HP -= GameConstants.TeddyBearProjectileDamage;
                             //TODO
                         }
                     }
@@ -352,11 +357,22 @@ namespace GameProject
         private void SpawnBear(SoundEffect boundeMP3, SoundEffect shootMP3)
         {
             // generate random locationSpawnBorderSize
-        
+
+
+
+            int border = GameConstants.SpawnBorderSize;
+
+
+
+
+
+
+
+
             int width = GetRandomLocation(0, GameConstants.WindowWidth);
             int height = GetRandomLocation(0, GameConstants.WindowHeight);
+
             Vector2 loacation = new Vector2(width, height);
-            int border = GameConstants.SpawnBorderSize;
             loacation = Vector2.Clamp(loacation, (new Vector2(0 + border, 0 + border)), new Vector2(winWidth - border, winHeight - border));
 
             float speed =  RandomNumberGenerator.NextFloat(GameConstants.BearSpeedRange);
@@ -364,8 +380,6 @@ namespace GameProject
             {
                 speed = GameConstants.MinBearSpeed;
             }
-
-        
             float angle = RandomNumberGenerator.NextFloat((float)Math.PI);
 
             // generate random velocity
@@ -375,9 +389,45 @@ namespace GameProject
             Vector2 velocity = new Vector2(RandomNumberGenerator.RandomVelocity(-2, 3) * speed, RandomNumberGenerator.RandomVelocity(-2, 3) * speed);
 
             // create new bear
-            TeddyBear newBear = new TeddyBear(Content, "bin/graphics/teddybear", (int)loacation.X, (int)loacation.Y, velocity, boundeMP3, shootMP3);
+
 
             // make sure we don't spawn into a collision
+
+            List<Rectangle> otherRec = new List<Rectangle>();
+            foreach (var bear in bears)
+            {
+                if (bear.Active)
+                {
+                    otherRec.Add(bear.CollisionRectangle);
+                }
+            }
+            foreach (var proj in projectiles)
+            {
+                if (proj.Type == ProjectileType.FrenchFries && proj.Active)
+                    otherRec.Add(proj.CollisionRectangle);
+            }
+            
+            if(burger != null)
+            {
+                otherRec.Add(burger.CollisionRectangle);
+            }
+
+            bool Ready = false;
+
+
+            while(!Ready)
+            {
+                width = GetRandomLocation(0, GameConstants.WindowWidth);
+                height = GetRandomLocation(0, GameConstants.WindowHeight);
+                loacation = new Vector2(width, height);
+                loacation = Vector2.Clamp(loacation, (new Vector2(0 + border, 0 + border)), new Vector2(winWidth - border, winHeight - border));
+
+                Rectangle rect = new Rectangle((int)loacation.X, (int)loacation.Y, teddySprite.Width, teddySprite.Height);
+                Ready = CollisionUtils.IsCollisionFree(rect, otherRec);
+
+            }
+
+            TeddyBear newBear = new TeddyBear(Content, "bin/graphics/teddybear", (int)loacation.X, (int)loacation.Y, velocity, boundeMP3, shootMP3);
 
             // add new bear to list
             bears.Add(newBear);

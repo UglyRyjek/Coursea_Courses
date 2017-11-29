@@ -5,6 +5,8 @@ using System.Text;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Audio;
+
 
 namespace GameProject
 {
@@ -28,6 +30,8 @@ namespace GameProject
         int currentFrame;
         int elapsedFrameTime = 0;
 
+        SoundEffect explosionSound;
+
         // playing or not
         bool playing = false;
         bool finished = false;
@@ -42,13 +46,16 @@ namespace GameProject
         /// <param name="spriteStrip">the sprite strip for the explosion</param>
         /// <param name="x">the x location of the center of the explosion</param>
         /// <param name="y">the y location of the center of the explosion</param>
-        public Explosion(Texture2D spriteStrip, int x, int y)
+        public Explosion(Texture2D spriteStrip, int x, int y, SoundEffect boomSound)
         {
             // initialize animation to start at frame 0
             currentFrame = 0;
 
             Initialize(spriteStrip);
             Play(x, y);
+
+            explosionSound = boomSound;
+            explosionSound.Play();
         }
 
         #endregion
@@ -156,6 +163,8 @@ namespace GameProject
             drawRectangle.X = x - drawRectangle.Width / 2;
             drawRectangle.Y = y - drawRectangle.Height / 2;
             SetSourceRectangleLocation(currentFrame);
+
+
         }
 
         /// <summary>

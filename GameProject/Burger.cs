@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 namespace GameProject
-{
+{// / 5 * gameTime.ElapsedGameTime.Milliseconds;
     /// <summary>
     /// A burger
     /// </summary>
@@ -47,7 +47,7 @@ namespace GameProject
         public int HP
         {
             get { return health; }
-            set { health += value;  if (health < 0) health = 0; }
+            set { health += -value;  if (health < 0) health = 0; }
         }
 
         /// <summary>
@@ -65,25 +65,92 @@ namespace GameProject
         /// </summary>
         /// <param name="gameTime">game time</param>
         /// <param name="mouse">the current state of the mouse</param>
-        public void Update(GameTime gameTime, MouseState mouse)
+        //public void Update(GameTime gameTime, MouseState mouse)
+        public void Update(GameTime gameTime, MouseState mouse, KeyboardState klawiatura)
+
         {
             //burger should only respond to input if it still has health
             if (health <= 0)
             {
                 return; // its passess the rest of the methond this way
             }
+
+
+            bool up = klawiatura.IsKeyDown(Keys.W);
+            bool down = klawiatura.IsKeyDown(Keys.S);
+            bool right = klawiatura.IsKeyDown(Keys.D);
+            bool left = klawiatura.IsKeyDown(Keys.A);
+            int speed = GameConstants.BurgerMovementAmount;
+            
+            
+            if (down)
+            {
+                if (right || left)
+                {
+                    drawRectangle.Y += (int)(Math.Sqrt((double)speed) + speed/2);
+                }
+                else
+                {
+                drawRectangle.Y += speed;// 
+                }
+            }
+
+            if (up)
+            {
+                if (right || left)
+                {
+                    drawRectangle.Y -= (int)(Math.Sqrt((double)speed) + speed / 2);
+                }
+                else
+                {
+                drawRectangle.Y -= speed;// 
+
+                }
+            }
+
+            if (right)
+            {
+                if (up || down)
+                {
+                    drawRectangle.X += (int)(Math.Sqrt((double)speed) + speed / 2);
+                }
+                else
+                { 
+                drawRectangle.X += speed;// 
+                }
+            }
+
+            if (left)
+            {
+                if (up || down)
+                {
+                    drawRectangle.X -= (int)(Math.Sqrt((double)speed) + speed / 2);
+                }
+                else
+                {
+                    drawRectangle.X -= speed;// 
+                }
+            }
+
+
+            if (klawiatura.IsKeyDown(Keys.S) && klawiatura.IsKeyDown(Keys.D))
+            {
+
+
+            }
             // move burger using mouse
             // clamp burger in window
-            drawRectangle.X = MathHelper.Clamp(mouse.X, 0, GameConstants.WindowWidth - sprite.Width);
-            drawRectangle.Y = MathHelper.Clamp(mouse.Y, 0, GameConstants.WindowHeight - sprite.Height);
+            drawRectangle.X = MathHelper.Clamp(drawRectangle.X, 0, GameConstants.WindowWidth - sprite.Width);
+            drawRectangle.Y = MathHelper.Clamp(drawRectangle.Y, 0, GameConstants.WindowHeight - sprite.Height);
             // update shooting allowed
             // timer concept (for animations) introduced in Chapter 7
             // shoot if appropriate
             if (mouse.LeftButton == ButtonState.Pressed && canShoot)
             {
                 float vel = GameConstants.FrenchFriesProjectileSpeed;
-                Projectile pocisk = new Projectile(ProjectileType.FrenchFries, Game1.GetProjectileSprite(ProjectileType.FrenchFries), mouse.X + drawRectangle.Width / 2, (mouse.Y + drawRectangle.Height / 2) + GameConstants.FrenchFriesProjectileOffset, -vel);
+                Projectile pocisk = new Projectile(ProjectileType.FrenchFries, Game1.GetProjectileSprite(ProjectileType.FrenchFries), drawRectangle.Center.X, drawRectangle.Center.Y + GameConstants.FrenchFriesProjectileOffset, -vel);
                 Game1.AddProjectile(pocisk);
+                shootSound.Play();
                 canShoot = false;
                 elapsedCooldownMilliseconds = 0;
             }

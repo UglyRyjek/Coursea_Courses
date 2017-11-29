@@ -124,6 +124,7 @@ namespace GameProject
             {
                 Projectile pocisk = new Projectile(ProjectileType.TeddyBear, Game1.GetProjectileSprite(ProjectileType.TeddyBear), drawRectangle.X + drawRectangle.Width / 2, (drawRectangle.Y + drawRectangle.Height / 2) + GameConstants.TeddyBearProjectileOffset, GetProjectileYVelocity());
                 Game1.AddProjectile(pocisk);
+                shootSound.Play();
                 elapsedShotMilliseconds = 0;
                 firingDelay = GetRandomFiringDelay();
             }
@@ -168,12 +169,14 @@ namespace GameProject
                 // bounce off top
                 drawRectangle.Y = 0;
                 velocity.Y *= -1;
+                bounceSound.Play();
             }
             else if ((drawRectangle.Y + drawRectangle.Height) > GameConstants.WindowHeight)
             {
                 // bounce off bottom
                 drawRectangle.Y = GameConstants.WindowHeight - drawRectangle.Height;
                 velocity.Y *= -1;
+                bounceSound.Play();
             }
         }
         /// <summary>
@@ -186,12 +189,14 @@ namespace GameProject
                 // bounc off left
                 drawRectangle.X = 0;
                 velocity.X *= -1;
+                bounceSound.Play();
             }
             else if ((drawRectangle.X + drawRectangle.Width) > GameConstants.WindowWidth)
             {
                 // bounce off right
                 drawRectangle.X = GameConstants.WindowWidth - drawRectangle.Width;
                 velocity.X *= -1;
+                bounceSound.Play();
             }
         }
         /// <summary>
